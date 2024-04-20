@@ -5,7 +5,7 @@ const path = require("path");
 const { call } = require('./call');
 const config = require('./config');
 const instance = axios.create({
-    baseURL: 'https://www.mrdappointments.gov.nl.ca/qmaticwebbooking/rest/schedule/branches/1eeaa32dbd6d7ead5a17b8aa3c7d12544e70ad5bad55eab02d3e03893d2eb42e/'
+    baseURL: 'https://www.mrdappointments.gov.nl.ca/qmaticwebbooking/rest/schedule/branches/1eeaa32dbd6d7ead5a17b8aa3c7d12544e70ad5bad55eab02d3e03893d2eb42e/dates'
 })
 const locationUrl = `dates;servicePublicId=378dcad3a2874a41a1018cb96d57a21c63912e1884dead32d94d14b244abe8ae;customSlotLength=30`
 const get = async (url) => {
@@ -17,6 +17,16 @@ const get = async (url) => {
         return []
     }
 }
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+const debouncedCall = debounce(call, 60000);
+
 const query = async () => {
     const datas = await get(locationUrl)
     console.log(`query at ${new Date()}, here is the result: ${datas.map(i => i.date).join(', ')}`)
@@ -28,7 +38,7 @@ const query = async () => {
             if (result[0]?.time)
                 playAudio()
             if (config.call) {
-                call()
+                debouncedCall()
             }
             console.log(result)
         } else {
