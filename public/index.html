@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log Viewer</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <table id="logsTable" class="display">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Query</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+    </table>
+
+    <script>
+    $(document).ready(function() {
+        $('#logsTable').DataTable({
+            "ajax": {
+                "url": "/logs",
+                "dataSrc": function(json) {
+                    // 分析日志字符串，将其转换为对象数组
+                    var data = json.logs.split(", here is the result: ");
+                    var queryInfo = data[0].split("query at ");
+                    return [{
+                        timestamp: queryInfo[1],
+                        query: queryInfo[0].trim(),
+                        result: data[1].trim()
+                    }];
+                }
+            },
+            "columns": [
+                { "data": "timestamp" },
+                { "data": "query" },
+                { "data": "result" }
+            ]
+        });
+    });
+    </script>
+</body>
+</html>
